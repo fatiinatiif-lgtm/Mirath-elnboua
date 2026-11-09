@@ -1,0 +1,38 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack project files
+        run: |
+          unzip -o code.zip
+          unzip -o books_small.zip
+          unzip -o books_17.zip
+          unzip -o books_18.zip
+          ls assets/books | wc -l
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android Gradle wrapper files
+        run: |
+          flutter create --platforms=android --project-name mirath_alnobowa --org com.mirath /tmp/mirath_bootstrap
+          cp /tmp/mirath_bootstrap/android/gradlew android/gradlew
+          cp /tmp/mirath_bootstrap/android/gradlew.bat android/gradlew.bat
+          mkdir -p android/gradle/wrapper
+          cp /tmp/mirath_bootstrap/android/gradle/wrapper/* android/gradle/wrapper/
+          chmod +x android/gradlew
+      - name: Get packages
+        run: flutter pub get
+      - name: Build APK
+        run: flutter build apk --release
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mirath-nobowa-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
