@@ -19,14 +19,18 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Generate Android Gradle wrapper files
+      - name: Regenerate Android project with current Flutter
         run: |
-          flutter create --platforms=android --project-name mirath_alnobowa --org com.mirath /tmp/mirath_bootstrap
-          cp /tmp/mirath_bootstrap/android/gradlew android/gradlew
-          cp /tmp/mirath_bootstrap/android/gradlew.bat android/gradlew.bat
-          mkdir -p android/gradle/wrapper
-          cp /tmp/mirath_bootstrap/android/gradle/wrapper/* android/gradle/wrapper/
-          chmod +x android/gradlew
+          cp pubspec.yaml /tmp/pubspec.yaml.bak
+          cp -r lib /tmp/lib.bak
+          rm -rf android
+          flutter create --platforms=android --project-name mirath_alnobowa --org com.mirath .
+          cp /tmp/pubspec.yaml.bak pubspec.yaml
+          rm -rf lib
+          cp -r /tmp/lib.bak lib
+          rm -rf test
+          sed -i 's/android:label="[^"]*"/android:label="ميراث النبوة"/' android/app/src/main/AndroidManifest.xml
+          grep label android/app/src/main/AndroidManifest.xml
       - name: Get packages
         run: flutter pub get
       - name: Build APK
