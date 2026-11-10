@@ -11,9 +11,7 @@ jobs:
       - name: Unpack project files
         run: |
           unzip -o code.zip
-          unzip -o books_small.zip
-          unzip -o books_17.zip
-          unzip -o books_18.zip
+          for f in books_*.zip; do unzip -o "$f"; done
           ls assets/books | wc -l
       - uses: subosito/flutter-action@v2
         with:
