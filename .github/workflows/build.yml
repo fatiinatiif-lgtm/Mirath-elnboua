@@ -14,6 +14,23 @@ jobs:
           for f in books_*.zip; do unzip -o "$f"; done
           for p in assets/books/*.part1; do [ -e "$p" ] || continue; b="${p%.part1}"; cat "$b".part* > "$b"; rm -f "$b".part*; done
           ls assets/books | wc -l
+      - name: Download decorative font (optional)
+        run: |
+          mkdir -p assets/fonts
+          for name in ArefRuqaa-Regular.ttf ArefRuqaa-Bold.ttf; do
+            for base in "https://raw.githubusercontent.com/google/fonts/main/ofl/arefruqaa" "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/arefruqaa"; do
+              curl -fsSL --retry 2 "$base/$name" -o "assets/fonts/$name" || true
+              if [ -s "assets/fonts/$name" ] && [ "$(stat -c%s "assets/fonts/$name")" -gt 10000 ]; then break; fi
+              rm -f "assets/fonts/$name"
+            done
+          done
+          if [ ! -s assets/fonts/ArefRuqaa-Regular.ttf ] || [ ! -s assets/fonts/ArefRuqaa-Bold.ttf ]; then
+            echo "Font download failed - building without the decorative font"
+            rm -rf assets/fonts
+            sed -i '/# FONTS-START/,/# FONTS-END/d' pubspec.yaml
+          fi
+          ls -la assets/fonts || true
+          tail -12 pubspec.yaml
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
