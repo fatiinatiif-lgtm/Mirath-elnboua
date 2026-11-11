@@ -12,6 +12,7 @@ jobs:
         run: |
           unzip -o code.zip
           for f in books_*.zip; do unzip -o "$f"; done
+          for p in assets/books/*.part1; do [ -e "$p" ] || continue; b="${p%.part1}"; cat "$b".part* > "$b"; rm -f "$b".part*; done
           ls assets/books | wc -l
       - uses: subosito/flutter-action@v2
         with:
